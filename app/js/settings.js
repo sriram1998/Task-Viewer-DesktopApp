@@ -1,37 +1,22 @@
 'use strict';
+var ipcRenderer=require('electron').ipcRenderer;
 
-var ipc = require('ipc');
-var configuration = require('../configuration');
 
-var modifierCheckboxes = document.querySelectorAll('.global-shortcut');
+const psList=require('ps-list');
+
+
 var closeEl = document.querySelector('.close');
 
 closeEl.addEventListener('click', function (e) {
-    ipc.send('close-settings-window');
+    ipcRenderer.send('close-tasks-window');
 });
 
-for (var i = 0; i < modifierCheckboxes.length; i++) {
-    var shortcutKeys = configuration.readSettings('shortcutKeys');
-    var modifierKey = modifierCheckboxes[i].attributes['data-modifier-key'].value;
-    modifierCheckboxes[i].checked = shortcutKeys.indexOf(modifierKey) !== -1;
 
-    modifierCheckboxes[i].addEventListener('click', function (e) {
-        bindModifierCheckboxes(e);
-    });
-}
 
-function bindModifierCheckboxes(e) {
-    var shortcutKeys = configuration.readSettings('shortcutKeys');
-    var modifierKey = e.target.attributes['data-modifier-key'].value;
-
-    if (shortcutKeys.indexOf(modifierKey) !== -1) {
-        var shortcutKeyIndex = shortcutKeys.indexOf(modifierKey);
-        shortcutKeys.splice(shortcutKeyIndex, 1);
-    }
-    else {
-        shortcutKeys.push(modifierKey);
-    }
-
-    configuration.saveSettings('shortcutKeys', shortcutKeys);
-    ipc.send('set-global-shortcuts');
-}
+var div=document.getElementById("tasks-screen");
+var i=0;
+psList().then(data => {
+    for(i=0;i<300;i++)
+        if(data[i].memory>4)
+            div.innerHTML += data[i].name + " ";
+});

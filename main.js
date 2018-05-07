@@ -1,74 +1,71 @@
 'use strict';
+const electron = require('electron');
 
-var app = require('app');
-var BrowserWindow = require('browser-window');
-var globalShortcut = require('global-shortcut');
-var configuration = require('./configuration');
-var ipc = require('ipc');
+const app = electron.app;
 
-var mainWindow = null;
-var settingsWindow = null;
+const psList=require('ps-list');
+var ipcMain=require('electron').ipcMain;
+
+
+
+
+
+const BrowserWindow = electron.BrowserWindow;
+
+
+const path = require('path');
+const url = require('url');
+
+
+let mainWindow;
+var taskWindow=null;
+
+
 
 app.on('ready', function() {
-    if (!configuration.readSettings('shortcutKeys')) {
-        configuration.saveSettings('shortcutKeys', ['ctrl', 'shift']);
-    }
+    
 
     mainWindow = new BrowserWindow({
         frame: false,
-        height: 700,
+        height: 600,
         resizable: false,
-        width: 368
+        width: 800
     });
 
-    mainWindow.loadUrl('file://' + __dirname + '/app/index.html');
+    mainWindow.loadURL('file://' + __dirname + '/app/index.html');
 
-    setGlobalShortcuts();
+    
 });
 
-function setGlobalShortcuts() {
-    globalShortcut.unregisterAll();
 
-    var shortcutKeysSetting = configuration.readSettings('shortcutKeys');
-    var shortcutPrefix = shortcutKeysSetting.length === 0 ? '' : shortcutKeysSetting.join('+') + '+';
 
-    globalShortcut.register(shortcutPrefix + '1', function () {
-        mainWindow.webContents.send('global-shortcut', 0);
-    });
-    globalShortcut.register(shortcutPrefix + '2', function () {
-        mainWindow.webContents.send('global-shortcut', 1);
-    });
-}
-
-ipc.on('close-main-window', function () {
+ipcMain.on('close-main-window', function () {
     app.quit();
 });
 
-ipc.on('open-settings-window', function () {
-    if (settingsWindow) {
+ipcMain.on('open-tasks-window', function () {
+    if (taskWindow) {
         return;
     }
 
-    settingsWindow = new BrowserWindow({
+    taskWindow = new BrowserWindow({
         frame: false,
-        height: 200,
+        height: 600,
         resizable: false,
-        width: 200
+        width: 600
     });
 
-    settingsWindow.loadUrl('file://' + __dirname + '/app/settings.html');
+    taskWindow.loadURL('file://' + __dirname + '/app/settings.html');
 
-    settingsWindow.on('closed', function () {
-        settingsWindow = null;
+    taskWindow.on('closed', function () {
+        taskWindow = null;
     });
 });
 
-ipc.on('close-settings-window', function () {
-    if (settingsWindow) {
-        settingsWindow.close();
+ipcMain.on('close-tasks-window', function () {
+    if (taskWindow) {
+        taskWindow.close();
     }
 });
 
-ipc.on('set-global-shortcuts', function () {
-    setGlobalShortcuts();
-});
+
