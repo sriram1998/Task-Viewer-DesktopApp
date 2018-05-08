@@ -55,7 +55,7 @@ ipcMain.on('open-tasks-window', function () {
         width: 600
     });
 
-    taskWindow.loadURL('file://' + __dirname + '/app/settings.html');
+    taskWindow.loadURL('file://' + __dirname + '/app/tasks.html');
 
     taskWindow.on('closed', function () {
         taskWindow = null;
